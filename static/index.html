@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vastarion Garage</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+
+    @font-face {
+      font-family: "TT Ricordi Allegria";
+      src: url("/static/fonts/TT-Ricordi-Allegria-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --bg-base: #0A0A0F;
+      --bg-deep: #05050A;
+
+      --accent: #3A5BFF;
+      --accent-2: #1D3BFF;
+      --accent-soft: rgba(58, 91, 255, 0.25);
+
+      --glass-strong: rgba(18, 22, 32, 0.58);
+
+      --text-main: #E9EDF7;
+      --text-dim: rgba(233, 237, 247, 0.62);
+
+      --danger: #ff4d4d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height: 1.45;
+      letter-spacing: 0.1px;
+
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: geometricPrecision;
+
+      background: radial-gradient(1000px 600px at 50% 18%, rgba(58, 91, 255, 0.16) 0%, rgba(10, 10, 15, 0) 55%),
+        radial-gradient(900px 700px at 25% 80%, rgba(30, 40, 90, 0.18) 0%, rgba(10, 10, 15, 0) 60%),
+        linear-gradient(180deg, var(--bg-base) 0%, var(--bg-deep) 100%);
+
+      overflow-x: hidden;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+
+      position: relative;
+      isolation: isolate;
+    }
+
+    /* --- BACKGROUND ATMOSPHERE --- */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(900px 550px at 50% 40%, rgba(25, 50, 140, 0.22) 0%, rgba(10, 10, 15, 0.0) 60%),
+        radial-gradient(900px 650px at 70% 75%, rgba(58, 91, 255, 0.12) 0%, rgba(10, 10, 15, 0.0) 55%),
+        radial-gradient(1200px 800px at 20% 80%, rgba(20, 30, 60, 0.18) 0%, rgba(10, 10, 15, 0.0) 60%),
+        linear-gradient(180deg, var(--bg-base) 0%, var(--bg-deep) 100%);
+      filter: saturate(110%);
+    }
+
+    /* subtle edge streaks */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        linear-gradient(115deg,
+          rgba(58, 91, 255, 0.0) 0%,
+          rgba(58, 91, 255, 0.10) 30%,
+          rgba(58, 91, 255, 0.0) 55%,
+          rgba(58, 91, 255, 0.06) 70%,
+          rgba(58, 91, 255, 0.0) 100%);
+      transform: translateX(-12%) rotate(-12deg);
+      filter: blur(22px);
+      opacity: 0.45;
+      mix-blend-mode: screen;
+    }
+
+    .loader-wrapper {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 15, 0.82);
+      backdrop-filter: blur(12px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loader {
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      position: relative;
+
+      border: 2px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.02);
+
+      box-shadow:
+        0 22px 60px rgba(0, 0, 0, 0.70),
+        0 0 70px rgba(58, 91, 255, 0.30),
+        0 0 0 2px rgba(58, 91, 255, 0.12) inset;
+
+      animation: loader-rotate 1.05s linear infinite;
+    }
+
+    .loader::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg,
+          rgba(58, 91, 255, 0.00),
+          rgba(58, 91, 255, 0.55),
+          rgba(58, 91, 255, 0.00));
+      filter: blur(0.6px);
+      mask: radial-gradient(farthest-side, transparent 62%, #000 63%);
+      opacity: 0.95;
+    }
+
+    .loader::before {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: rgba(233, 237, 247, 0.85);
+      box-shadow: 0 0 18px rgba(58, 91, 255, 0.45);
+    }
+
+    @keyframes loader-rotate {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* --- NAVBAR --- */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(5, 5, 10, 0.70);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "TT Ricordi Allegria", 'Inter', sans-serif;
+      font-weight: 400;
+      letter-spacing: 2.4px;
+      color: rgba(233, 237, 247, 0.88);
+      text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.10);
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      filter: drop-shadow(0 0 10px rgba(58, 91, 255, 0.40));
+    }
+
+    .logo-icon-lg {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      filter: drop-shadow(0 0 16px rgba(58, 91, 255, 0.45));
+      margin-bottom: 12px;
+    }
+
+    #auth-title {
+      font-family: "TT Ricordi Allegria", sans-serif;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .logo span {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow:
+        0 0 18px rgba(58, 91, 255, 0.35),
+        0 0 2px rgba(233, 237, 247, 0.12);
+    }
+
+    /* --- LAYOUT --- */
+    .main-layout {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 42px;
+      gap: 40px;
+      flex-grow: 1;
+    }
+
+    /* --- CARDS --- */
+    .card {
+      position: relative;
+      background: var(--glass-strong);
+      border-radius: 24px;
+      padding: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+      transition: 280ms ease;
+    }
+
+    /* premium edge glow on hover */
+    .card:hover {
+      border-color: rgba(58, 91, 255, 0.18);
+      box-shadow:
+        0 34px 82px rgba(0, 0, 0, 0.62),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 0 40px rgba(58, 91, 255, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      pointer-events: none;
+      background: radial-gradient(700px 240px at 50% 0%,
+          rgba(58, 91, 255, 0.18) 0%,
+          rgba(58, 91, 255, 0.0) 60%);
+      opacity: 0.65;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      margin-top: 46px;
+      align-self: center;
+    }
+
+    .garage-panel {
+      display: none;
+      width: 100%;
+      max-width: 1200px;
+      grid-template-columns: 350px 1fr;
+      gap: 40px;
+    }
+
+    h2,
+    h3 {
+      margin-top: 0;
+      font-weight: 600;
+    }
+
+    h2 {
+      font-size: 1.65rem;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    /* --- INPUTS / SELECT --- */
+    input,
+    select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      padding: 14px 14px;
+      border-radius: 12px;
+      color: var(--text-main);
+      margin-bottom: 14px;
+      outline: none;
+      transition: 220ms ease;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+    }
+
+    input::placeholder {
+      color: rgba(233, 237, 247, 0.40);
+    }
+
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: none;
+    }
+
+    select::-ms-expand {
+      display: none;
+    }
+
+    /* old Edge/IE */
+
+    select option {
+      background-color: #0F1522;
+      color: #E9EDF7;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      filter: invert(1) brightness(1.5);
+    }
+
+
+    input:focus,
+    select:focus {
+      border-color: rgba(58, 91, 255, 0.45);
+      box-shadow:
+        0 0 0 4px rgba(58, 91, 255, 0.14),
+        0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+      transform: translateY(-1px);
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: "▾";
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      color: rgba(233, 237, 247, 0.55);
+      pointer-events: none;
+      font-size: 0.9rem;
+    }
+
+    /* --- PREMIUM BUTTON (subtle shimmer + edge glow) --- */
+    .btn-primary {
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: white;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 240ms ease;
+      margin-top: 10px;
+      box-shadow:
+        0 18px 36px rgba(0, 0, 0, 0.45),
+        0 10px 22px rgba(58, 91, 255, 0.14);
+    }
+
+    /* shimmer highlight (very subtle) */
+    .btn-primary::before {
+      content: "";
+      position: absolute;
+      top: -40%;
+      left: -60%;
+      width: 60%;
+      height: 180%;
+      background: linear-gradient(90deg,
+          rgba(255, 255, 255, 0.0) 0%,
+          rgba(255, 255, 255, 0.16) 50%,
+          rgba(255, 255, 255, 0.0) 100%);
+      transform: rotate(18deg);
+      opacity: 0.35;
+      animation: shimmer 4.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0% {
+        transform: translateX(0) rotate(18deg);
+        opacity: 0.0;
+      }
+
+      18% {
+        opacity: 0.35;
+      }
+
+      40% {
+        transform: translateX(280%) rotate(18deg);
+        opacity: 0.0;
+      }
+
+      100% {
+        transform: translateX(280%) rotate(18deg);
+        opacity: 0.0;
+      }
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.55),
+        0 16px 32px rgba(58, 91, 255, 0.22),
+        0 0 0 5px rgba(58, 91, 255, 0.12);
+      filter: saturate(112%);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0px);
+    }
+
+    .btn-logout {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      color: rgba(233, 237, 247, 0.78);
+      padding: 9px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 220ms ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-logout:hover {
+      border-color: rgba(58, 91, 255, 0.28);
+      box-shadow: 0 0 0 4px rgba(58, 91, 255, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .btn-delete {
+      background: rgba(255, 77, 77, 0.10);
+      color: #ff4d4d;
+      border: 1px solid rgba(255, 77, 77, 0.18);
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 220ms ease;
+    }
+
+    .btn-delete:hover {
+      background: rgba(255, 77, 77, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
+      min-width: 320px;
+      max-width: 560px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(18, 22, 32, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      color: var(--text-main);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 220ms ease;
+      z-index: 99999;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-color: rgba(58, 91, 255, 0.25);
+    }
+
+    .toast.danger {
+      border-color: rgba(255, 77, 77, 0.22);
+    }
+
+    .vehicle-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+
+      transition: 220ms ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .vehicle-card:hover {
+      transform: translateX(5px);
+      border-color: rgba(58, 91, 255, 0.20);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    }
+
+    .vehicle-title {
+      font-weight: 600;
+      font-size: 1.02rem;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .vehicle-meta {
+      margin-top: 6px;
+      font-size: 0.90rem;
+      color: var(--text-dim);
+    }
+
+    .vehicle-spec {
+      margin-top: 6px;
+      font-size: 0.88rem;
+      color: rgba(233, 237, 247, 0.78);
+    }
+
+    /* --- AUTH INLINE ERROR --- */
+    .auth-error {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: rgba(255, 92, 92, 0.95);
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: 180ms ease;
+      text-align: left;
+    }
+
+    .auth-error.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* --- Footer link underline effect (bigger) --- */
+    .auth-footer {
+      margin-top: 18px;
+      color: var(--text-dim);
+      font-size: 0.92rem;
+    }
+
+    .link {
+      color: rgba(233, 237, 247, 0.92);
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 6px;
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    /* wider + more visible */
+    .link::after {
+      content: "";
+      position: absolute;
+      left: -12%;
+      bottom: -7px;
+      width: 124%;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg,
+          rgba(58, 91, 255, 0),
+          rgba(58, 91, 255, 0.95),
+          rgba(58, 91, 255, 0));
+      opacity: 0.0;
+      transition: 220ms ease;
+      filter: blur(0.2px);
+    }
+
+    .link:hover {
+      color: var(--text-main);
+    }
+
+    .link:hover::after {
+      opacity: 1;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 15, 0.72);
+      backdrop-filter: blur(10px);
+      z-index: 99998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      background: rgba(18, 22, 32, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 20px;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65);
+      overflow: hidden;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 18px 18px 12px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .modal-body {
+      padding: 16px 18px 18px 18px;
+    }
+
+    .modal-block {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .access-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.015);
+      margin-bottom: 10px;
+    }
+
+    .access-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .access-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .access-email {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .access-meta {
+      color: var(--text-dim);
+      font-size: 0.88rem;
+    }
+
+    /* Responsive */
+    @media (max-width:900px) {
+      .main-layout {
+        padding: 24px;
+      }
+
+      .garage-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .navbar {
+        padding: 16px 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+
+      body::after {
+        opacity: 0.25;
+      }
+
+      .btn-primary::before {
+        display: none;
+      }
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px;
+      border-radius: 999px;
+    }
+
+    .tab-btn {
+      border: 0;
+      background: transparent;
+      color: rgba(233, 237, 247, 0.72);
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: 200ms ease;
+    }
+
+    .tab-btn.active {
+      background: rgba(58, 91, 255, 0.18);
+      color: var(--text-main);
+      box-shadow: 0 0 0 1px rgba(58, 91, 255, 0.18) inset;
+    }
+
+    .vehicle-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      color: rgba(233, 237, 247, 0.85);
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 200ms ease;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(58, 91, 255, 0.22);
+      box-shadow: 0 0 0 4px rgba(58, 91, 255, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      color: rgba(233, 237, 247, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .user-email {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .user-role {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: white;
+      cursor: pointer;
+      transition: 200ms ease;
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 3px rgba(58, 91, 255, 0.25);
+    }
+
+    .profile-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 280px;
+      background: rgba(18, 22, 32, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(16px);
+      padding: 20px;
+      z-index: 200;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: 200ms ease;
+    }
+
+    .profile-dropdown.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .profile-dropdown .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .profile-dropdown .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+    }
+
+    .profile-dropdown .profile-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 0.88rem;
+    }
+
+    .profile-dropdown .profile-stat-label {
+      color: var(--text-dim);
+    }
+
+    .profile-dropdown .profile-stat-value {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loader-overlay" class="loader-wrapper" aria-hidden="true">
+    <div class="loader"></div>
+  </div>
+
+  <nav id="navbar" class="navbar" style="display:none;">
+    <div class="logo">
+      <img src="/static/vastarion-logo.png" alt="Vastarion Garage" class="logo-icon">
+      VASTARION <span>GARAGE</span>
+    </div>
+    <div class="nav-right">
+      <div id="user-info-panel" class="user-info" style="display:none; position:relative;">
+        <div class="user-avatar" id="user-avatar" onclick="toggleProfileDropdown()">?</div>
+        <div>
+          <div class="user-email" id="nav-user-email"></div>
+          <div class="user-role" id="nav-user-role"></div>
+        </div>
+
+        <!-- Profile Dropdown -->
+        <div id="profile-dropdown" class="profile-dropdown">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar-lg">?</div>
+            <div>
+              <div style="font-weight:600; color:var(--text-main);" id="profile-email"></div>
+              <div
+                style="font-size:0.78rem; color:var(--accent); text-transform:uppercase; letter-spacing:1px; font-weight:700;"
+                id="profile-role"></div>
+            </div>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-label">Member since</span>
+            <span class="profile-stat-value" id="profile-created">—</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat-label">Vehicles</span>
+            <span class="profile-stat-value" id="profile-vehicle-count">—</span>
+          </div>
+        </div>
+      </div>
+      <button onclick="handleLogout()" class="btn-logout">System Logout</button>
+    </div>
+  </nav>
+
+  <div class="main-layout">
+    <div id="auth-container" class="card auth-card">
+      <img src="/static/vastarion-logo.png" alt="Vastarion Garage" class="logo-icon-lg">
+      <div class="brand-mark">VASTARION GARAGE</div>
+      <h2 id="auth-title">Welcome Back</h2>
+      <p id="auth-desc" class="sub">Access your premium garage</p>
+
+      <div class="input-group">
+        <input type="email" id="login-email" placeholder="E-mail Address" />
+        <input type="password" id="login-password" placeholder="Password" />
+      </div>
+
+      <div id="auth-error" class="auth-error"></div>
+
+      <button id="auth-submit-btn" onclick="handleLogin()" class="btn-primary">Login</button>
+
+      <p class="auth-footer">
+        <span id="auth-toggle-text">Don't have an account?</span>
+        <a class="link" onclick="toggleAuth()">Sign Up</a>
+      </p>
+    </div>
+
+    <div id="garage-content" class="garage-panel">
+      <div class="card">
+        <h3>Register New Vehicle</h3>
+        <input type="text" id="vin" placeholder="VIN (Chassis Number)" />
+
+        <div class="select-wrap">
+          <select id="brand" onchange="updateModels()">
+            <option value="">Select Brand</option>
+            <option value="Porsche">Porsche</option>
+            <option value="Bentley">Bentley</option>
+            <option value="BMW">BMW</option>
+            <option value="Mercedes-Benz">Mercedes-Benz</option>
+          </select>
+        </div>
+
+        <div class="select-wrap">
+          <select id="model">
+            <option value="">Select Model</option>
+          </select>
+        </div>
+
+        <input type="number" id="year" placeholder="Year" />
+        <input type="number" id="mileage" placeholder="Mileage (KM)" value="0" />
+        <div class="select-wrap">
+          <select id="color">
+            <option value="">Select Color</option>
+            <option value="Obsidian Black">Obsidian Black</option>
+            <option value="Midnight Blue">Midnight Blue</option>
+            <option value="Arctic Silver">Arctic Silver</option>
+            <option value="Pearl White">Pearl White</option>
+            <option value="Graphite Grey">Graphite Grey</option>
+          </select>
+        </div>
+
+        <button onclick="addVehicle()" class="btn-primary">Send to Garage</button>
+      </div>
+
+      <div id="vehicle-list-container" class="card">
+        <div class="section-head">
+          <h3 style="margin:0;">Garage</h3>
+
+          <div class="tabs">
+            <button class="tab-btn active" id="tab-mine" onclick="switchTab('mine')">My Collection</button>
+            <button class="tab-btn" id="tab-shared" onclick="switchTab('shared')">Shared With Me</button>
+          </div>
+        </div>
+
+        <div id="tab-content-mine">
+          <div id="vehicle-list"></div>
+        </div>
+
+        <div id="tab-content-shared" style="display:none;">
+          <div id="shared-vehicle-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+
+  <!-- ACCESS MODAL -->
+  <div id="access-modal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div style="font-weight:700; font-size:1.05rem;">Manage Access</div>
+          <div id="access-modal-sub" style="color: var(--text-dim); font-size:0.9rem; margin-top:4px;"></div>
+        </div>
+        <button class="btn-ghost" onclick="closeAccessModal()">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-block">
+          <div style="font-weight:600; margin-bottom:10px;">Share with user</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input id="share-email" type="email" placeholder="user@email.com" style="flex: 1 1 240px; margin:0;" />
+            <div class="select-wrap" style="flex: 0 0 180px;">
+              <select id="share-permission" style="margin:0;">
+                <option value="viewer">viewer</option>
+                <option value="editor">editor</option>
+                <option value="driver">driver</option>
+              </select>
+            </div>
+            <button class="btn-primary" style="flex: 0 0 180px; margin:0;" onclick="shareAccess()">Grant</button>
+          </div>
+          <div id="share-error" style="color:#ff5c5c; font-size:0.85rem; margin-top:10px; display:none;"></div>
+        </div>
+
+        <div class="modal-block" style="margin-top:18px;">
+          <div style="font-weight:600; margin-bottom:10px;">Who has access?</div>
+          <div id="access-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div id="delete-modal" class="modal-overlay" style="display:none;">
+    <div class="modal" style="max-width:560px;">
+      <div class="modal-head">
+        <div>
+          <div style="font-weight:700; font-size:1.05rem;">Confirm Removal</div>
+          <div id="delete-modal-sub" style="color: var(--text-dim); font-size:0.9rem; margin-top:4px;"></div>
+        </div>
+        <button class="btn-ghost" onclick="closeDeleteModal()">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-block">
+          <div style="color: var(--text-dim); line-height:1.45;">
+            Safety step: type the vehicle VIN to confirm deletion (soft delete).
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+            <input id="delete-confirm-vin" type="text" placeholder="Type VIN to confirm"
+              style="flex: 1 1 280px; margin:0;">
+            <button class="btn-delete" style="flex: 0 0 180px; margin:0;" onclick="confirmDelete()">Remove</button>
+          </div>
+
+          <div id="delete-error" style="color:#ff5c5c; font-size:0.9rem; margin-top:10px; display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICE MODAL -->
+  <div id="service-modal" class="modal-overlay" style="display:none;">
+    <div class="modal" style="max-width:760px;">
+      <div class="modal-head">
+        <div>
+          <div style="font-weight:700; font-size:1.05rem;">Service History</div>
+          <div id="service-modal-sub" style="color: var(--text-dim); font-size:0.9rem; margin-top:4px;"></div>
+        </div>
+        <button class="btn-ghost" onclick="closeServiceModal()">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-block">
+          <div style="font-weight:600; margin-bottom:10px;">Add record</div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <input id="svc-desc" type="text" placeholder="Description (e.g. Oil change)" style="margin:0;">
+            <input id="svc-service" type="text" placeholder="Service name (optional)" style="margin:0;">
+            <input id="svc-mileage" type="number" placeholder="Mileage" style="margin:0;">
+            <input id="svc-cost" type="number" placeholder="Cost (optional)" style="margin:0;">
+          </div>
+          <div style="margin-top:10px; display:flex; gap:10px; justify-content:flex-end;">
+            <button class="btn-primary" style="width:auto; padding:10px 14px; margin:0;"
+              onclick="addServiceRecord()">Add</button>
+          </div>
+          <div id="service-error" style="color:#ff5c5c; font-size:0.9rem; margin-top:10px; display:none;"></div>
+        </div>
+
+        <div class="modal-block" style="margin-top:18px;">
+          <div style="font-weight:600; margin-bottom:10px;">Records</div>
+          <div id="service-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div id="edit-modal" class="modal-overlay" style="display:none;">
+    <div class="modal" style="max-width:560px;">
+      <div class="modal-head">
+        <div>
+          <div style="font-weight:700; font-size:1.05rem;">Edit Vehicle</div>
+          <div id="edit-modal-sub" style="color: var(--text-dim); font-size:0.9rem; margin-top:4px;"></div>
+        </div>
+        <button class="btn-ghost" onclick="closeEditModal()">Close</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-block">
+          <div class="select-wrap">
+            <select id="edit-brand" onchange="updateEditModels()" style="margin-bottom:10px;">
+              <option value="">Select Brand</option>
+              <option value="Porsche">Porsche</option>
+              <option value="Bentley">Bentley</option>
+              <option value="BMW">BMW</option>
+              <option value="Mercedes-Benz">Mercedes-Benz</option>
+            </select>
+          </div>
+          <div class="select-wrap">
+            <select id="edit-model" style="margin-bottom:10px;">
+              <option value="">Select Model</option>
+            </select>
+          </div>
+          <input type="number" id="edit-year" placeholder="Year" style="margin-bottom:10px;">
+          <input type="number" id="edit-mileage" placeholder="Mileage (KM)" style="margin-bottom:10px;">
+          <div class="select-wrap">
+            <select id="edit-color" style="margin-bottom:10px;">
+              <option value="">Select Color</option>
+              <option value="Obsidian Black">Obsidian Black</option>
+              <option value="Midnight Blue">Midnight Blue</option>
+              <option value="Arctic Silver">Arctic Silver</option>
+              <option value="Pearl White">Pearl White</option>
+              <option value="Graphite Grey">Graphite Grey</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:4px;">
+            <button class="btn-primary" style="margin:0;" onclick="submitEdit()">Save Changes</button>
+          </div>
+          <div id="edit-error" style="color:#ff5c5c; font-size:0.9rem; margin-top:10px; display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    const API_BASE_NORM = API_BASE.replace(/\/+$/, "");
+
+    function api(path) {
+      return `${API_BASE_NORM}${path.startsWith("/") ? "" : "/"}${path}`;
+    }
+
+    let isLoginMode = true;
+    let currentAccessVin = null;
+    let currentDeleteVin = null;
+    let currentServiceVin = null;
+    let currentEditVin = null;
+
+
+    function openServiceModal(vin, titleText) {
+      currentServiceVin = vin;
+      document.getElementById("service-modal-sub").textContent = titleText || `VIN: ${vin}`;
+      document.getElementById("service-error").style.display = "none";
+      document.getElementById("service-modal").style.display = "flex";
+      loadServiceRecords();
+    }
+
+    function closeServiceModal() {
+      document.getElementById("service-modal").style.display = "none";
+      currentServiceVin = null;
+    }
+
+    async function loadServiceRecords() {
+      if (!currentServiceVin) return;
+      const token = localStorage.getItem("token");
+      const list = document.getElementById("service-list");
+      list.innerHTML = `<p style="color: var(--text-dim); margin:0;">Loading...</p>`;
+
+      try {
+        const resp = await fetch(api(`/vehicles/${encodeURIComponent(currentServiceVin)}/service-records`), {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!resp.ok) {
+          list.innerHTML = `<p style="color:#ff5c5c; margin:0;">Cannot load service records.</p>`;
+          return;
+        }
+
+        const items = await resp.json();
+        if (!items || items.length === 0) {
+          list.innerHTML = `<p style="color: var(--text-dim); margin:0;">No records.</p>`;
+          return;
+        }
+
+        list.innerHTML = items.map(r => `
+        <div class="vehicle-card" style="margin-bottom:10px;">
+          <div>
+            <div class="vehicle-title">${r.description}</div>
+            <div class="vehicle-meta">${new Date(r.date).toLocaleString()} • ${r.mileage?.toLocaleString?.() ?? r.mileage} KM</div>
+            <div class="vehicle-spec">
+              ${(r.service_name || "—")} • ${(r.cost != null ? (r.cost.toLocaleString() + " ₺") : "—")}
+            </div>
+          </div>
+          <button class="btn-delete" onclick="deleteServiceRecord(${r.id})">Delete</button>
+        </div>
+      `).join("");
+      } catch (e) {
+        list.innerHTML = `<p style="color:#ff5c5c; margin:0;">Network error.</p>`;
+      }
+    }
+
+    async function addServiceRecord() {
+      if (!currentServiceVin) return;
+
+      const token = localStorage.getItem("token");
+      const err = document.getElementById("service-error");
+
+      const payload = {
+        description: document.getElementById("svc-desc").value.trim(),
+        mileage: parseInt(document.getElementById("svc-mileage").value, 10),
+        cost: document.getElementById("svc-cost").value ? parseInt(document.getElementById("svc-cost").value, 10) : null,
+        service_name: document.getElementById("svc-service").value.trim() || null
+      };
+
+      if (!payload.description || !payload.mileage) {
+        err.textContent = "Description and mileage are required.";
+        err.style.display = "block";
+        return;
+      }
+
+      err.style.display = "none";
+
+      try {
+        showLoader();
+        const resp = await fetch(api(`/vehicles/${encodeURIComponent(currentServiceVin)}/service-records`), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        setTimeout(() => hideLoader(), 320);
+
+        if (!resp.ok) {
+          const j = await resp.json().catch(() => ({}));
+          // owner-only ise burada 404/403 gibi dönebilir
+          showToast(j.detail || "Not allowed to add service record.", "danger");
+          return;
+        }
+
+        showToast("Service record added.", "success");
+        document.getElementById("svc-desc").value = "";
+        document.getElementById("svc-mileage").value = "";
+        document.getElementById("svc-cost").value = "";
+        document.getElementById("svc-service").value = "";
+        loadServiceRecords();
+
+      } catch (e) {
+        hideLoader();
+        showToast("Network error.", "danger");
+      }
+    }
+
+    function switchTab(which) {
+      const mine = document.getElementById("tab-content-mine");
+      const shared = document.getElementById("tab-content-shared");
+      const bMine = document.getElementById("tab-mine");
+      const bShared = document.getElementById("tab-shared");
+
+      if (which === "mine") {
+        mine.style.display = "block";
+        shared.style.display = "none";
+        bMine.classList.add("active");
+        bShared.classList.remove("active");
+      } else {
+        mine.style.display = "none";
+        shared.style.display = "block";
+        bShared.classList.add("active");
+        bMine.classList.remove("active");
+        getSharedVehicles();
+      }
+    }
+
+    function openAccessModal(vin, titleText) {
+      currentAccessVin = vin;
+      document.getElementById("access-modal-sub").textContent = titleText || `VIN: ${vin}`;
+      document.getElementById("share-email").value = "";
+      document.getElementById("share-permission").value = "viewer";
+      document.getElementById("share-error").style.display = "none";
+      document.getElementById("access-modal").style.display = "flex";
+      loadAccessList();
+    }
+
+    function closeAccessModal() {
+      document.getElementById("access-modal").style.display = "none";
+      currentAccessVin = null;
+    }
+    function openDeleteModal(vin, titleText) {
+      currentDeleteVin = vin;
+      document.getElementById("delete-modal-sub").textContent = titleText || `VIN: ${vin}`;
+      document.getElementById("delete-confirm-vin").value = "";
+      const err = document.getElementById("delete-error");
+      err.style.display = "none";
+      err.textContent = "";
+      document.getElementById("delete-modal").style.display = "flex";
+    }
+
+    function closeDeleteModal() {
+      document.getElementById("delete-modal").style.display = "none";
+      currentDeleteVin = null;
+    }
+
+    async function confirmDelete() {
+      if (!currentDeleteVin) return;
+
+      const err = document.getElementById("delete-error");
+      const typed = (document.getElementById("delete-confirm-vin").value || "").trim().toUpperCase();
+      const expected = (currentDeleteVin || "").trim().toUpperCase();
+
+      if (typed !== expected) {
+        err.textContent = "VIN mismatch. Please type the exact VIN.";
+        err.style.display = "block";
+        return;
+      }
+
+      err.style.display = "none";
+      await deleteVehicle(currentDeleteVin.trim());
+      closeDeleteModal();
+    }
+
+    async function getSharedVehicles() {
+      const token = localStorage.getItem('token');
+      const listDiv = document.getElementById('shared-vehicle-list');
+      listDiv.innerHTML = '<p style="color: var(--text-dim);">Loading...</p>';
+
+      try {
+        const resp = await fetch(api('/vehicles/shared-with-me'), {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!resp.ok) {
+          listDiv.innerHTML = '<p style="color:#ff5c5c;">Cannot load shared vehicles.</p>';
+          return;
+        }
+
+        const vehicles = await resp.json();
+        if (!vehicles || vehicles.length === 0) {
+          listDiv.innerHTML = '<p style="color: var(--text-dim);">No shared vehicles.</p>';
+          return;
+        }
+
+        listDiv.innerHTML = vehicles.map(v => `
+        <div class="vehicle-card">
+          <div>
+            <div class="vehicle-title">
+              ${v.brand} ${v.model}
+              <span class="badge" style="margin-left:8px;">owner: ${v.owner_email}</span>
+            </div>
+            <div class="vehicle-meta">
+              VIN: <span style="color: var(--text-main);">${v.vin}</span> •
+              <span style="color: var(--text-main);">${v.year}</span>
+            </div>
+            <div class="vehicle-spec">
+              ${v.color || "Not specified"} • ${v.mileage ? v.mileage.toLocaleString() : "0"} KM
+            </div>
+          </div>
+          <div class="vehicle-actions">
+            <button class="btn-ghost" onclick="openServiceModal('${v.vin}', '${v.brand} ${v.model}')">Service</button>
+          </div>
+        </div>
+      `).join("");
+
+      } catch (e) {
+        listDiv.innerHTML = '<p style="color:#ff5c5c;">Network error.</p>';
+      }
+    }
+
+    async function loadAccessList() {
+      if (!currentAccessVin) return;
+      const token = localStorage.getItem("token");
+      const list = document.getElementById("access-list");
+      list.innerHTML = `<p style="color: var(--text-dim); margin:0;">Loading...</p>`;
+
+      try {
+        const resp = await fetch(api(`/vehicles/${encodeURIComponent(currentAccessVin)}/access`), {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!resp.ok) {
+          list.innerHTML = `<p style="color:#ff5c5c; margin:0;">Cannot load access list.</p>`;
+          return;
+        }
+
+        const items = await resp.json();
+        if (!items || items.length === 0) {
+          list.innerHTML = `<p style="color: var(--text-dim); margin:0;">No shared users.</p>`;
+          return;
+        }
+
+        list.innerHTML = items.map(i => `
+        <div class="access-row">
+          <div class="access-left">
+            <div class="access-email">${i.email || ("user_id: " + i.user_id)}</div>
+            <div class="access-meta">permission: <span style="color: var(--text-main);">${i.permission || i.role || "viewer"}</span></div>
+          </div>
+          <button class="btn-delete" onclick="revokeAccess('${i.user_id}')">Revoke</button>
+        </div>
+      `).join("");
+
+      } catch (e) {
+        list.innerHTML = `<p style="color:#ff5c5c; margin:0;">Network error.</p>`;
+      }
+    }
+
+    async function shareAccess() {
+      if (!currentAccessVin) return;
+      const token = localStorage.getItem("token");
+
+      const email = document.getElementById("share-email").value.trim();
+      const permission = document.getElementById("share-permission").value;
+
+      const err = document.getElementById("share-error");
+      err.style.display = "none";
+
+      if (!email) {
+        err.textContent = "Email is required.";
+        err.style.display = "block";
+        return;
+      }
+
+      try {
+        showLoader();
+        const resp = await fetch(api(`/vehicles/${encodeURIComponent(currentAccessVin)}/share`), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ email, permission })
+        });
+
+        setTimeout(() => hideLoader(), 280);
+
+        if (resp.ok) {
+          showToast("Access granted.", "info");
+          await loadAccessList();
+          return;
+        }
+
+        const data = await resp.json().catch(() => ({}));
+        err.textContent = data.detail || "Share failed.";
+        err.style.display = "block";
+
+      } catch (e) {
+        hideLoader();
+        err.textContent = "Network error.";
+        err.style.display = "block";
+      }
+    }
+
+    async function revokeAccess(userId) {
+      if (!currentAccessVin) return;
+      const token = localStorage.getItem("token");
+
+      try {
+        showLoader();
+        const resp = await fetch(api(`/vehicles/${encodeURIComponent(currentAccessVin)}/access/${encodeURIComponent(userId)}`), {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        setTimeout(() => hideLoader(), 280);
+
+        if (resp.ok) {
+          showToast("Access revoked.", "info");
+          await loadAccessList();
+        } else {
+          showToast("Revoke failed.", "danger");
+        }
+      } catch (e) {
+        hideLoader();
+        showToast("Network error.", "danger");
+      }
+    }
+
+    function showLoader() {
+      const overlay = document.getElementById("loader-overlay");
+      overlay.style.display = "flex";
+      overlay.style.opacity = "1";
+    }
+
+    function hideLoader() {
+      const overlay = document.getElementById("loader-overlay");
+      overlay.style.opacity = "0";
+      setTimeout(() => {
+        overlay.style.display = "none";
+      }, 220);
+    }
+
+    function showToast(message, type = "info") {
+      const t = document.getElementById("toast");
+      if (!t) return;
+      t.className = "toast show" + (type === "danger" ? " danger" : type === "success" ? " success" : "");
+      t.textContent = message;
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+    }
+
+    function setAuthError(message) {
+      const el = document.getElementById("auth-error");
+      if (!el) return;
+      if (!message) {
+        el.textContent = "";
+        el.classList.remove("show");
+        return;
+      }
+      el.textContent = message;
+      el.classList.add("show");
+    }
+
+    // AUTH & UI TOGGLE
+    function toggleAuth() {
+      isLoginMode = !isLoginMode;
+      const title = document.getElementById('auth-title');
+      const desc = document.getElementById('auth-desc');
+      const btn = document.getElementById('auth-submit-btn');
+      const toggleText = document.getElementById('auth-toggle-text');
+      const link = document.querySelector('.link');
+
+      if (isLoginMode) {
+        title.innerText = "Welcome Back";
+        desc.innerText = "Access your premium garage.";
+        btn.innerText = "Login";
+        btn.onclick = handleLogin;
+        toggleText.innerText = "Don't have an account?";
+        link.innerText = "Sign Up";
+      } else {
+        title.innerText = "Join Vastarion";
+        desc.innerText = "Create your exclusive account.";
+        btn.innerText = "Create Account";
+        btn.onclick = handleSignup;
+        toggleText.innerText = "Already have an account?";
+        link.innerText = "Login";
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      const formData = new FormData();
+      formData.append('username', email);
+      formData.append('password', password);
+
+      try {
+        setAuthError("");
+        showLoader();
+        const response = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('token', data.access_token);
+          // short luxury pause
+          setTimeout(() => {
+            hideLoader();
+            checkAuth();
+          }, 450);
+        } else {
+          hideLoader();
+          const errorData = await response.json();
+          setAuthError(errorData.detail || "Invalid credentials.");
+        }
+      } catch (error) {
+        hideLoader();
+        console.error(error);
+        setAuthError("Sunucuya bağlanılamadı.");
+      }
+    }
+
+    async function handleSignup() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      try {
+        setAuthError("");
+        showLoader();
+        const response = await fetch(`${API_BASE}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password })
+        });
+
+        if (response.ok) {
+          setTimeout(() => {
+            hideLoader();
+            showToast("Account created. Please login.", "success");
+            if (!isLoginMode) toggleAuth();
+          }, 450);
+        } else {
+          hideLoader();
+          const err = await response.json();
+          setAuthError(err.detail || "Signup failed.");
+        }
+      } catch (error) {
+        hideLoader();
+        console.error(error);
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('token');
+      location.reload();
+    }
+
+    const vehicleDatabase = {
+      "Porsche": ["911 Turbo S", "Taycan", "Cayenne", "Panamera", "718 Cayman"],
+      "Bentley": ["Continental GT", "Bentayga", "Flying Spur", "Mulsanne"],
+      "BMW": ["M8 Competition", "M5 CS", "X7", "i7", "M3 Touring"],
+      "Mercedes-Benz": ["G63 AMG", "S-Class", "AMG GT", "EQS", "E-Class"]
+    };
+
+    function updateModels() {
+      const brandSelect = document.getElementById("brand");
+      const modelSelect = document.getElementById("model");
+      const selectedBrand = brandSelect.value;
+
+      modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+      if (selectedBrand && vehicleDatabase[selectedBrand]) {
+        vehicleDatabase[selectedBrand].forEach(modelName => {
+          let option = document.createElement("option");
+          option.value = modelName;
+          option.text = modelName;
+          modelSelect.add(option);
+        });
+      }
+    }
+
+    async function getMyVehicles() {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE}/vehicles/my-vehicles`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const vehicles = await response.json();
+        renderVehicles(vehicles);
+      } else if (response.status === 401) {
+        handleLogout();
+      }
+    }
+
+    function renderVehicles(vehicles) {
+      const listDiv = document.getElementById('vehicle-list');
+      listDiv.innerHTML = '';
+
+      if (vehicles.length === 0) {
+        listDiv.innerHTML = `
+          <div style="text-align:center; padding:40px 20px;">
+            <div style="font-size:2.5rem; margin-bottom:12px; opacity:0.4;">🏎️</div>
+            <div style="color: var(--text-dim); font-size:0.95rem;">Your garage is empty</div>
+            <div style="color: var(--text-dim); font-size:0.85rem; margin-top:4px; opacity:0.7;">Register your first vehicle above</div>
+          </div>`;
+        return;
+      }
+
+      vehicles.forEach(v => {
+        listDiv.innerHTML += `
+            <div class="vehicle-card">
+                <div>
+                <div class="vehicle-title">${v.brand} ${v.model}</div>
+                <div class="vehicle-meta">
+                    VIN: <span style="color: var(--text-main);">${v.vin}</span> •
+                    <span style="color: var(--text-main);">${v.year}</span>
+                </div>
+                <div class="vehicle-spec">
+                    ${v.color || "Not specified"} • ${v.mileage ? v.mileage.toLocaleString() : "0"} KM
+                </div>
+                </div>
+                <div class="vehicle-actions">
+                  <button class="btn-ghost" onclick="openEditModal('${v.vin}', '${v.brand}', '${v.model}', ${v.year}, ${v.mileage || 0}, '${v.color || ''}')">Edit</button>
+                  <button class="btn-ghost" onclick="openServiceModal('${v.vin}', '${v.brand} ${v.model}')">Service</button>
+                  <button class="btn-ghost" onclick="openAccessModal('${v.vin}', '${v.brand} ${v.model}')">Manage</button>
+                  <button onclick="openDeleteModal('${v.vin}', '${v.brand} ${v.model}')" class="btn-delete">Remove</button>
+                </div>
+            </div>`;
+      });
+    }
+
+    async function addVehicle() {
+      const token = localStorage.getItem('token');
+
+      const vinVal = document.getElementById('vin').value;
+      const brandVal = document.getElementById('brand').value;
+      const modelVal = document.getElementById('model').value;
+      const yearVal = document.getElementById('year').value;
+      const mileageVal = document.getElementById('mileage').value;
+      const colorVal = document.getElementById('color').value;
+
+      if (!vinVal || !brandVal || !modelVal || !yearVal) {
+        showToast("VIN, Brand, Model and Year are required.", "danger");
+        return;
+      }
+
+      const vehicleData = {
+        vin: vinVal,
+        brand: brandVal,
+        model: modelVal,
+        year: parseInt(yearVal),
+        mileage: parseInt(mileageVal) || 0,
+        color: colorVal || "Standart"
+      };
+
+      try {
+        showLoader();
+        const response = await fetch(api('/vehicles/'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(vehicleData)
+        });
+
+        if (response.ok) {
+          setTimeout(() => hideLoader(), 320);
+          showToast("Vehicle added.", "success");
+          document.getElementById('vin').value = '';
+          document.getElementById('year').value = '';
+          document.getElementById('mileage').value = '';
+          document.getElementById('color').value = '';
+          getMyVehicles();
+        } else {
+          hideLoader();
+          const err = await response.json();
+          showToast(err.detail || "Create failed.", "danger");
+          console.error("Backend Hatası:", err);
+        }
+      } catch (error) {
+        hideLoader();
+        console.error("Bağlantı Hatası:", error);
+        showToast("Network error.", "danger");
+      }
+    }
+
+    async function deleteVehicle(vin) {
+      const token = localStorage.getItem('token');
+      try {
+        showLoader();
+        const response = await fetch(api(`/vehicles/${encodeURIComponent(vin)}`), {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        setTimeout(() => hideLoader(), 320);
+
+        if (response.ok) {
+          showToast("Vehicle removed.", "success");
+          getMyVehicles();
+        } else {
+          const err = await response.json();
+          showToast(err.detail || "Delete failed.", "danger");
+        }
+      } catch (e) {
+        hideLoader();
+        showToast("Network error.", "danger");
+      }
+    }
+
+    async function deleteServiceRecord(recordId) {
+      if (!currentServiceVin) return;
+      const token = localStorage.getItem("token");
+      try {
+        showLoader();
+        const resp = await fetch(api(`/vehicles/${encodeURIComponent(currentServiceVin)}/service-records/${recordId}`), {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        setTimeout(() => hideLoader(), 280);
+        if (resp.ok) {
+          showToast("Service record deleted.", "success");
+          loadServiceRecords();
+        } else {
+          const j = await resp.json().catch(() => ({}));
+          showToast(j.detail || "Delete failed.", "danger");
+        }
+      } catch (e) {
+        hideLoader();
+        showToast("Network error.", "danger");
+      }
+    }
+
+    // --- EDIT MODAL ---
+    function openEditModal(vin, brand, model, year, mileage, color) {
+      currentEditVin = vin;
+      document.getElementById("edit-modal-sub").textContent = `VIN: ${vin}`;
+      document.getElementById("edit-error").style.display = "none";
+
+      // Pre-fill values
+      document.getElementById("edit-brand").value = brand;
+      updateEditModels();
+      document.getElementById("edit-model").value = model;
+      document.getElementById("edit-year").value = year;
+      document.getElementById("edit-mileage").value = mileage;
+      document.getElementById("edit-color").value = color;
+
+      document.getElementById("edit-modal").style.display = "flex";
+    }
+
+    function closeEditModal() {
+      document.getElementById("edit-modal").style.display = "none";
+      currentEditVin = null;
+    }
+
+    function updateEditModels() {
+      const brandSelect = document.getElementById("edit-brand");
+      const modelSelect = document.getElementById("edit-model");
+      const selectedBrand = brandSelect.value;
+
+      modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+      if (selectedBrand && vehicleDatabase[selectedBrand]) {
+        vehicleDatabase[selectedBrand].forEach(modelName => {
+          let option = document.createElement("option");
+          option.value = modelName;
+          option.text = modelName;
+          modelSelect.add(option);
+        });
+      }
+    }
+
+    async function submitEdit() {
+      if (!currentEditVin) return;
+      const token = localStorage.getItem("token");
+      const err = document.getElementById("edit-error");
+      err.style.display = "none";
+
+      const payload = {};
+      const brand = document.getElementById("edit-brand").value;
+      const model = document.getElementById("edit-model").value;
+      const year = document.getElementById("edit-year").value;
+      const mileage = document.getElementById("edit-mileage").value;
+      const color = document.getElementById("edit-color").value;
+
+      if (brand) payload.brand = brand;
+      if (model) payload.model = model;
+      if (year) payload.year = parseInt(year, 10);
+      if (mileage !== "" && mileage !== null) payload.mileage = parseInt(mileage, 10);
+      if (color) payload.color = color;
+
+      if (Object.keys(payload).length === 0) {
+        err.textContent = "No changes to save.";
+        err.style.display = "block";
+        return;
+      }
+
+      try {
+        showLoader();
+        const resp = await fetch(api(`/vehicles/${encodeURIComponent(currentEditVin)}`), {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        setTimeout(() => hideLoader(), 320);
+
+        if (resp.ok) {
+          showToast("Vehicle updated.", "success");
+          closeEditModal();
+          getMyVehicles();
+        } else {
+          const j = await resp.json().catch(() => ({}));
+          err.textContent = j.detail || "Update failed.";
+          err.style.display = "block";
+        }
+      } catch (e) {
+        hideLoader();
+        err.textContent = "Network error.";
+        err.style.display = "block";
+      }
+    }
+
+    // --- PROFILE DROPDOWN ---
+    function toggleProfileDropdown() {
+      const dd = document.getElementById('profile-dropdown');
+      dd.classList.toggle('open');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+      const dd = document.getElementById('profile-dropdown');
+      const avatar = document.getElementById('user-avatar');
+      if (dd && !dd.contains(e.target) && e.target !== avatar) {
+        dd.classList.remove('open');
+      }
+    });
+
+    async function loadUserProfile() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const resp = await fetch(api('/users/me'), {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (resp.ok) {
+          const user = await resp.json();
+          const initial = user.email.charAt(0).toUpperCase();
+
+          // Navbar
+          document.getElementById('nav-user-email').textContent = user.email;
+          document.getElementById('nav-user-role').textContent = user.role;
+          document.getElementById('user-avatar').textContent = initial;
+          document.getElementById('user-info-panel').style.display = 'flex';
+
+          // Profile dropdown
+          document.getElementById('profile-email').textContent = user.email;
+          document.getElementById('profile-role').textContent = user.role;
+          document.getElementById('profile-avatar-lg').textContent = initial;
+          document.getElementById('profile-created').textContent = new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+          // Vehicle count
+          try {
+            const vResp = await fetch(api('/vehicles/my-vehicles'), {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (vResp.ok) {
+              const vehicles = await vResp.json();
+              document.getElementById('profile-vehicle-count').textContent = vehicles.length;
+            }
+          } catch (e) { /* silent */ }
+        }
+      } catch (e) { /* silent */ }
+    }
+
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      const authContainer = document.getElementById('auth-container');
+      const garageContent = document.getElementById('garage-content');
+      const navbar = document.getElementById('navbar');
+
+      if (token) {
+        authContainer.style.display = 'none';
+        garageContent.style.display = 'grid';
+        navbar.style.display = 'flex';
+        getMyVehicles();
+        loadUserProfile();
+      } else {
+        authContainer.style.display = 'block';
+        garageContent.style.display = 'none';
+        navbar.style.display = 'none';
+      }
+    }
+
+    window.onload = () => {
+      const emailEl = document.getElementById('login-email');
+      const passEl = document.getElementById('login-password');
+      if (emailEl) emailEl.addEventListener('input', () => setAuthError(""));
+      if (passEl) passEl.addEventListener('input', () => setAuthError(""));
+      checkAuth();
+    };
+  </script>
+</body>
+
+</html>
