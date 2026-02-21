@@ -83,7 +83,7 @@ That's it! The app will:
 3. Run Alembic migrations
 4. Start the API server
 
-- 🌐 **Frontend**: [http://localhost:8000/static/index_yeni.html](http://localhost:8000/static/index_yeni.html)
+- 🌐 **Frontend**: [http://localhost:8000/static/index.html](http://localhost:8000/static/index.html)
 - 📖 **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 To stop: `docker-compose down` (add `-v` to also delete database data)
