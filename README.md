@@ -30,6 +30,8 @@
 | **Auth** | JWT (python-jose) |
 | **Password Hashing** | bcrypt |
 | **Testing** | Pytest |
+| **Containerization** | Docker & Docker Compose |
+| **CI/CD** | GitHub Actions |
 
 ## Project Structure
 
@@ -48,16 +50,47 @@ Vehicle Access/
 │   ├── vehicles.py         # CRUD + sharing + service records
 │   └── users.py            # GET /users/me
 ├── static/
-│   └── index_yeni.html     # Single-page frontend
+│   └── index.html          # Single-page frontend
 ├── alembic/                # Database migrations
 ├── tests/
 │   └── test_api.py         # API tests
+├── .github/
+│   └── workflows/
+│       └── test.yml        # GitHub Actions CI
+├── Dockerfile              # Container image definition
+├── docker-compose.yml      # One-command project setup
+├── start.sh                # Startup script (wait for DB + migrate)
+├── .dockerignore
 ├── requirements.txt
 ├── .env.example
 └── .gitignore
 ```
 
-## Getting Started
+## Quick Start (Docker)
+
+> **Recommended** — No need to install PostgreSQL or run migrations manually.
+
+```bash
+# Clone and start everything
+git clone https://github.com/callmeouz/vastarion-garage.git
+cd vastarion-garage
+docker-compose up --build
+```
+
+That's it! The app will:
+1. Start PostgreSQL automatically
+2. Wait for the database to be ready
+3. Run Alembic migrations
+4. Start the API server
+
+- 🌐 **Frontend**: [http://localhost:8000/static/index_yeni.html](http://localhost:8000/static/index_yeni.html)
+- 📖 **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+To stop: `docker-compose down` (add `-v` to also delete database data)
+
+---
+
+## Getting Started (Manual)
 
 ### Prerequisites
 
@@ -160,6 +193,23 @@ python -m pytest tests/test_api.py -v
 - Users (profile endpoint)
 - Healthcheck
 
+## Why Alembic?
+
+Database schema changes are version-controlled through Alembic migrations:
+
+```bash
+# Create a new migration after model changes
+alembic revision --autogenerate -m "add user table"
+
+# Apply all pending migrations
+alembic upgrade head
+```
+
+- Production deployments use migrations, not `create_all()`
+- Schema consistency across dev/staging/production environments
+- Full rollback capability with `alembic downgrade`
+- Migration history tracked in version control
+
 ## Architectural Decisions
 
 This project implements production-oriented backend practices:
@@ -171,6 +221,8 @@ This project implements production-oriented backend practices:
 - Modular router separation (auth, vehicles, users)
 - Environment-based configuration using `.env`
 - Strict input validation with Pydantic v2
+- Dockerized deployment with one-command setup
+- CI pipeline with GitHub Actions
 
 The goal was to design a secure, maintainable, and scalable backend service
 that goes beyond simple CRUD operations.

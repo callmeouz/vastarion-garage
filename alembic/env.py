@@ -4,6 +4,9 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from app.database import Base
 from app import models
 
@@ -12,6 +15,11 @@ from sqlalchemy import pool
 from alembic import context
 
 config = context.config
+
+# Override alembic.ini URL with DATABASE_URL env var (used by Docker)
+database_url = os.getenv("DATABASE_URL")
+if database_url:
+    config.set_main_option("sqlalchemy.url", database_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
