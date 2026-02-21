@@ -133,7 +133,7 @@ alembic upgrade head
 uvicorn main:app --reload
 ```
 
-Open [http://localhost:8000/static/index_yeni.html](http://localhost:8000/static/index.html) in your browser.
+Open [http://localhost:8000/static/index.html](http://localhost:8000/static/index.html) in your browser.
 
 API docs available at [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI).
 
